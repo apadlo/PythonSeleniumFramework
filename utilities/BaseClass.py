@@ -1,33 +1,43 @@
-import pytest
-import logging
+from __future__ import annotations
+
 import inspect
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
+import logging
+from pathlib import Path
+
+import pytest
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
 
 @pytest.mark.usefixtures("setup")
 class BaseClass:
+    def wait_for_presence(self, locator: tuple[str, str], timeout: int = 10):
+        return WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located(locator))
 
-    def verifyLinkPresence(self, locator, text):
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(EC.presence_of_element_located((locator, text)))
+    def wait_for_visible(self, locator: tuple[str, str], timeout: int = 10):
+        return WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
 
-    def selectOptionByText(self, locator, text):
-        sel = Select(locator)
-        sel.select_by_visible_text(text)
+    def wait_for_clickable(self, locator: tuple[str, str], timeout: int = 10):
+        return WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable(locator))
+
+    def verifyLinkPresence(self, locator, text):  # noqa: N802
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((locator, text)))
+
+    @staticmethod
+    def selectOptionByText(locator, text):  # noqa: N802
+        Select(locator).select_by_visible_text(text)
 
     def get_logger(self):
-        loggerName = inspect.stack()[1][3]
-        logger = logging.getLogger(loggerName)
+        logger_name = inspect.stack()[1][3]
+        logger = logging.getLogger(logger_name)
 
-        fhand = logging.FileHandler('logfile.log')
-        formatter = logging.Formatter("%(asctime)s :%(levelname)s : %(name)s : %(message)s")
-        fhand.setFormatter(formatter)
-        if logger.hasHandlers():
-            logger.handlers.clear()
+        logs_dir = Path("reports") / "logs"
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        handler = logging.FileHandler(logs_dir / "test.log")
+        formatter = logging.Formatter("%(asctime)s : %(levelname)s : %(name)s : %(message)s")
+        handler.setFormatter(formatter)
 
-        logger.addHandler(fhand)
-
-        logger.setLevel(logging.DEBUG)
+        logger.handlers.clear()
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
         return logger
