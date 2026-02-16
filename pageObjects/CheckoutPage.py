@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from selenium.webdriver.common.by import By
 
 from pageObjects.ConfirmPage import ConfirmPage
@@ -24,8 +26,12 @@ class CheckoutPage(BasePage):
 
     def get_cart_count(self) -> int:
         text = self.wait_for_visible(self.cart_counter).text
-        count = text.split("(")[-1].replace(")", "") if "(" in text else "0"
-        return int(count)
+        # Handles values like "Checkout (1)" and labels that include hidden "(current)" text.
+        match = re.search(r"\((\d+)\)", text)
+        if match:
+            return int(match.group(1))
+        fallback = re.search(r"\d+", text)
+        return int(fallback.group(0)) if fallback else 0
 
     def open_cart(self) -> None:
         self.wait_for_clickable(self.cart_counter).click()
