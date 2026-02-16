@@ -11,22 +11,26 @@ class BasePage:
         self.driver = driver
         self.timeout = timeout
 
-    def wait_for_visible(self, locator: tuple[str, str]) -> WebElement:
-        return WebDriverWait(self.driver, self.timeout).until(
+    def wait_for_visible(self, locator: tuple[str, str], timeout: int | None = None) -> WebElement:
+        wait_timeout = timeout or self.timeout
+        return WebDriverWait(self.driver, wait_timeout).until(
             EC.visibility_of_element_located(locator)
         )
 
-    def wait_for_clickable(self, locator: tuple[str, str]) -> WebElement:
-        return WebDriverWait(self.driver, self.timeout).until(
+    def wait_for_clickable(self, locator: tuple[str, str], timeout: int | None = None) -> WebElement:
+        wait_timeout = timeout or self.timeout
+        return WebDriverWait(self.driver, wait_timeout).until(
             EC.element_to_be_clickable(locator)
         )
 
-    def wait_for_present(self, locator: tuple[str, str]) -> WebElement:
-        return WebDriverWait(self.driver, self.timeout).until(
+    def wait_for_present(self, locator: tuple[str, str], timeout: int | None = None) -> WebElement:
+        wait_timeout = timeout or self.timeout
+        return WebDriverWait(self.driver, wait_timeout).until(
             EC.presence_of_element_located(locator)
         )
 
-    def wait_for_all_visible(self, locator: tuple[str, str]) -> list[WebElement]:
-        return WebDriverWait(self.driver, self.timeout).until(
+    def wait_for_all_visible(self, locator: tuple[str, str], timeout: int | None = None) -> list[WebElement]:
+        wait_timeout = timeout or self.timeout
+        return WebDriverWait(self.driver, wait_timeout).until(
             EC.visibility_of_all_elements_located(locator)
         )
