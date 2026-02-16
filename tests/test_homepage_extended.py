@@ -38,6 +38,8 @@ class TestHomePageExtended(BaseClass):
 
     @pytest.mark.parametrize("keyword", ALERT_KEYWORDS)
     def test_success_message_contains_expected_keywords(self, keyword):
+        # Previous test may leave us on /shop; reset to form page first.
+        self.driver.get("https://rahulshettyacademy.com/angularpractice/")
         home = HomePage(self.driver)
         home.fill_name("KeywordUser")
         home.fill_email("keyword@example.com")
