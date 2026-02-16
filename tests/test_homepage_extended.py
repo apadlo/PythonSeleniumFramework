@@ -38,7 +38,13 @@ class TestHomePageExtended(BaseClass):
 
     @pytest.mark.parametrize("keyword", ALERT_KEYWORDS)
     def test_success_message_contains_expected_keywords(self, keyword):
+        # Previous test may leave us on /shop; reset to form page first.
+        self.driver.get("https://rahulshettyacademy.com/angularpractice/")
         home = HomePage(self.driver)
+
+        # Extra guard for CI flakiness: ensure form is visible before interacting.
+        home.wait_for_visible(home.name_input, timeout=20)
+
         home.fill_name("KeywordUser")
         home.fill_email("keyword@example.com")
         home.set_checkbox(True)
@@ -46,4 +52,4 @@ class TestHomePageExtended(BaseClass):
         home.submit()
 
         assert keyword in home.get_success_message()
-        self.driver.get(self.driver.current_url)
+        self.driver.get("https://rahulshettyacademy.com/angularpractice/")
