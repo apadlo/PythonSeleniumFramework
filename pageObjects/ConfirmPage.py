@@ -1,28 +1,50 @@
+from __future__ import annotations
+
 from selenium.webdriver.common.by import By
 
+from pageObjects.base_page import BasePage
 
-class ConfirmPage:
 
-    def __init__(self, driver):
-        self.driver = driver
+class ConfirmPage(BasePage):
+    country_input = (By.ID, "country")
+    purchase_btn = (By.CSS_SELECTOR, "input.btn")
+    success_alert = (By.CSS_SELECTOR, ".alert.alert-success.alert-dismissible")
 
-    countryWindow = (By.ID, "country")
-    pol = (By.LINK_TEXT, "Poland")
-    purchaseBtn = (By.CSS_SELECTOR, "input.btn")
-    successAlert = (By.CSS_SELECTOR, ".alert.alert-success.alert-dismissible")
+    def search_country(self, country_query: str) -> None:
+        field = self.wait_for_visible(self.country_input)
+        field.clear()
+        field.send_keys(country_query)
+
+    def select_country(self, country_name: str) -> None:
+        country_link = (By.LINK_TEXT, country_name)
+        self.wait_for_clickable(country_link).click()
+
+    def complete_purchase(self) -> None:
+        self.wait_for_clickable(self.purchase_btn).click()
+
+    def get_alert_text(self) -> str:
+        return self.wait_for_visible(self.success_alert).text
 
     @property
-    def inputCountry(self):
-        return self.driver.find_element(*ConfirmPage.countryWindow)
+    def inputCountry(self):  # noqa: N802
+        return self.wait_for_visible(self.country_input)
 
     @property
-    def selectPoland(self):
-        return self.driver.find_element(*ConfirmPage.pol)
+    def pol(self):
+        return (By.LINK_TEXT, "Poland")
 
     @property
-    def purchaseItem(self):
-        return self.driver.find_element(*ConfirmPage.purchaseBtn)
+    def selectPoland(self):  # noqa: N802
+        return self.wait_for_clickable((By.LINK_TEXT, "Poland"))
 
     @property
-    def getAlert(self):
-        return self.driver.find_element(*ConfirmPage.successAlert)
+    def purchaseItem(self):  # noqa: N802
+        return self.wait_for_clickable(self.purchase_btn)
+
+    @property
+    def successAlert(self):  # noqa: N802
+        return self.success_alert
+
+    @property
+    def getAlert(self):  # noqa: N802
+        return self.wait_for_visible(self.success_alert)
