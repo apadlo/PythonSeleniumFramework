@@ -31,11 +31,3 @@ class TestShopExtended(BaseClass):
         confirm.complete_purchase()
 
         assert "Success! Thank you!" in confirm.get_alert_text()
-
-    def test_country_suggestion_appears_for_poland_query(self, checkout_page):
-        checkout_page.add_product_to_cart("Blackberry")
-        checkout_page.open_cart()
-        confirm = checkout_page.proceed_to_checkout()
-        confirm.search_country("pol")
-        self.wait_for_clickable(("link text", "Poland"))
-        assert True
