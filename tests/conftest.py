@@ -27,6 +27,8 @@ def setup(request):
         options.add_argument("--window-size=1920,1080")
         options.add_argument("--disable-gpu")
         options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--remote-debugging-port=9222")
         driver = webdriver.Chrome(options=options)
     elif browser_name == "firefox":
         options = FirefoxOptions()
@@ -55,12 +57,16 @@ def pytest_runtest_makereport(item):
     if report.when in {"setup", "call"} and report.failed and not hasattr(report, "wasxfail"):
         driver = getattr(item.instance, "driver", None)
         if driver is not None:
-            screenshots_dir = Path("reports") / "screenshots"
-            screenshots_dir.mkdir(parents=True, exist_ok=True)
-            file_name = f"{report.nodeid.replace('::', '_').replace('/', '_')}.png"
-            file_path = screenshots_dir / file_name
-            driver.save_screenshot(str(file_path))
-            if pytest_html:
-                extras.append(pytest_html.extras.png(file_path.read_bytes(), mime_type="image/png"))
+            try:
+                screenshots_dir = Path("reports") / "screenshots"
+                screenshots_dir.mkdir(parents=True, exist_ok=True)
+                file_name = f"{report.nodeid.replace('::', '_').replace('/', '_')}.png"
+                file_path = screenshots_dir / file_name
+                driver.save_screenshot(str(file_path))
+                if pytest_html:
+                    extras.append(pytest_html.extras.png(file_path.read_bytes(), mime_type="image/png"))
+            except Exception as e:
+                if pytest_html:
+                    extras.append(pytest_html.extras.text(f"Screenshot capture failed: {e}"))
 
     report.extras = extras
