@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
@@ -17,7 +18,16 @@ class HomePage(BasePage):
     success_info = (By.CSS_SELECTOR, ".alert.alert-success.alert-dismissible")
 
     def open_shop(self) -> CheckoutPage:
-        self.wait_for_clickable(self.shop).click()
+        # If we're already on shop, avoid re-clicking nav links that can overlap in CI.
+        if "/shop" in self.driver.current_url:
+            return CheckoutPage(self.driver)
+
+        link = self.wait_for_clickable(self.shop)
+        try:
+            link.click()
+        except ElementClickInterceptedException:
+            # CI fallback: click via JS if header overlay/adjacent nav intercepts the click.
+            self.driver.execute_script("arguments[0].click();", link)
         return CheckoutPage(self.driver)
 
     # Backward-compatible alias
